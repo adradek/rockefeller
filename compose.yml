@@ -1,0 +1,23 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        RUBY_VERSION: '3.4.4'
+    image: rockefeller:1.0.0
+    tmpfs:
+      - /tmp
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+      - bundle:/usr/local/bundle
+      - history:/usr/local/hist
+    environment: &app_environment
+      EDITOR: nano
+      HISTFILE: /app/.bash/.bash_history
+    # command: bundle exec rails
+
+volumes:
+  bundle:
+  history:
