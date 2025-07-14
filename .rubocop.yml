@@ -1,0 +1,20 @@
+inherit_mode:
+  # Exclude instructions are merged, not overwritten
+  merge:
+    - Exclude
+
+require:
+  - standard
+  - standard-custom
+  - rubocop-rspec
+
+inherit_gem:
+  standard: config/base.yml # might be: config/ruby-3.0.yml
+  standard-custom: config/base.yml
+
+inherit_from:
+  - .rubocop_todo.yml
+  - .rubocop_strict.yml
+
+# RSpec/MultipleMemoizedHelpers:
+#   Max: 8
