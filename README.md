@@ -1,3 +1,3 @@
 # Rockefeller Wallet
 
-Be rich. Be happy 🤑💰💰💰
+Be happy. Be rich 🤑💰💰💰
