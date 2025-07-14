@@ -14,10 +14,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   apt-get update -qq \
   && DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
     build-essential \
-#    gnupg2 \
-#    curl \
-#    less \
-#    git
+    libssl-dev \
+    pkg-config \
     nano
 
 # Configure bundler
