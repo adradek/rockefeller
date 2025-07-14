@@ -26,7 +26,7 @@ class Mnemonic
     appended_entropy_bitstring
       .chars
       .each_slice(11)
-      .map{ |arr| dictionary[arr.join.to_i(2)] }
+      .map { |arr| dictionary[arr.join.to_i(2)] }
   end
 
   def validate_entropy
@@ -49,12 +49,11 @@ class Mnemonic
   end
 
   def load_dictionary
-    gem_spec = Gem::Specification.find_by_name('bitcoinrb')
+    gem_spec = Gem::Specification.find_by_name("bitcoinrb")
     english_wordlist_path = File.join(gem_spec.gem_dir, "lib", "bitcoin", "mnemonic", "wordlist", "english.txt")
     File.readlines(english_wordlist_path).map(&:strip)
-  rescue StandardError => e
-    STDERR.puts "An error occured while trying to read the mnemonic wordlist file"
+  rescue e
+    warn "An error occured while trying to read the mnemonic wordlist file"
     raise e
   end
 end
-

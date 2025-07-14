@@ -1,5 +1,5 @@
-require 'mnemonic'
-require_relative "misc/test_vectors.rb"
+require "mnemonic"
+require_relative "misc/test_vectors"
 
 describe Mnemonic do
   TestVectors::VECTORS.each do |entropy, expected_mnemonic|

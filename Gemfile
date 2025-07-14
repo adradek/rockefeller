@@ -14,6 +14,7 @@ gem "flay"
 gem "reek"
 gem "brakeman"
 gem "bundler-audit"
+gem "lefthook"
 
 # gem "bip32", "~> 0.1.0"
 # gem "bip39", "~> 0.1.0"
