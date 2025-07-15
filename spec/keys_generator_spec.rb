@@ -5,9 +5,9 @@ describe KeysGenerator do
   let(:passphrase) { "TREZOR" }
 
   TestVectors::VECTORS.each do |_, mnemonic, expected_seed|
-    it "produces right private key for specified mnemonic #{mnemonic}" do
+    it "produces the right seed for specified mnemonic #{mnemonic}" do
       generator = described_class.run(mnemonic: mnemonic, passphrase: passphrase)
-      expect(generator.seed512).to eq(expected_seed)
+      expect(generator.seed).to eq(expected_seed)
     end
   end
 
@@ -48,6 +48,20 @@ describe KeysGenerator do
       it "raises error" do
         expect { generator }.to raise_error(KeysGenerator::ArgumentError, /passphrase must be in NFKD form/)
       end
+    end
+  end
+
+  describe "master key and chain code generation" do
+    subject(:generator) { described_class.run(mnemonic: mnemonic) }
+
+    let(:mnemonic) { "skirt enact track fee kangaroo runway food force oppose very opinion lunar" }
+
+    it "generates right master key" do
+      expect(generator.master_key).to eq("084667a541b4a5be45d3c4ead6763308213ae474acd0fca2fd8008b41047ad8c")
+    end
+
+    it "generates right chain code" do
+      expect(generator.chain_code).to eq("ba1c517fcf6b97b1cfbcda48d11998928d4d183c12ab276ff4c60be1437732d1")
     end
   end
 end

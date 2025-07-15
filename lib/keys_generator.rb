@@ -6,7 +6,7 @@ class KeysGenerator
 
   HASHING_ROUNDS = 2048
 
-  attr_reader :mnemonic, :passphrase, :seed512
+  attr_reader :mnemonic, :passphrase, :seed, :master_key, :chain_code
 
   def self.run(mnemonic:, passphrase: "")
     new(mnemonic: mnemonic, passphrase: passphrase)
@@ -22,13 +22,17 @@ class KeysGenerator
   private
 
   def generate_keys
-    @seed512 = generate_seed512
+    binary_seed = generate_binary_seed
+    @seed = binary_seed.unpack1("H*")
+    @master_key, @chain_code =
+      OpenSSL::HMAC
+        .digest(OpenSSL::Digest.new("SHA512"), "Bitcoin seed", binary_seed)
+        .unpack1("H*")
+        .then { |hex_string| [hex_string[0...64], hex_string[64..]] }
   end
 
-  def generate_seed512
-    OpenSSL::PKCS5
-      .pbkdf2_hmac(mnemonic, "mnemonic#{passphrase}", HASHING_ROUNDS, 64, OpenSSL::Digest.new("SHA512"))
-      .unpack1("H*")
+  def generate_binary_seed
+    OpenSSL::PKCS5.pbkdf2_hmac(mnemonic, "mnemonic#{passphrase}", HASHING_ROUNDS, 64, OpenSSL::Digest.new("SHA512"))
   end
 
   def validate_normalization
