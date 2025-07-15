@@ -1,0 +1,12 @@
+pre-push:
+  commands:
+    rspec:
+      tags: backend rspec test
+      run: docker compose run --rm app bundle exec rspec
+
+pre-commit:
+  # parallel: true
+  commands:
+    rubocop:
+      tags: backend style
+      run: bundle exec rubocop

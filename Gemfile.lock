@@ -26,8 +26,6 @@ GEM
       secp256k1rb (= 0.1.1)
       siphash
       thor
-    brakeman (7.0.2)
-      racc
     bundler-audit (0.9.2)
       bundler (>= 1.2.0, < 3)
       thor (~> 1.0)
@@ -195,7 +193,6 @@ PLATFORMS
 
 DEPENDENCIES
   bitcoinrb
-  brakeman
   bundler-audit
   flay
   lefthook

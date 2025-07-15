@@ -12,7 +12,6 @@ gem "rubocop-rspec"
 gem "standard"
 gem "flay"
 gem "reek"
-gem "brakeman"
 gem "bundler-audit"
 gem "lefthook"
 

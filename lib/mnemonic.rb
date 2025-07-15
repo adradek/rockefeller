@@ -1,7 +1,8 @@
 require "digest"
 
+# This class is responsible for the seed phrase generation according to BIP-39 (English only)
 class Mnemonic
-  class InputError < StandardError; end
+  class ArgumentError < StandardError; end
 
   VALID_ENTROPY_SIZES = [128, 160, 192, 224, 256]
 
@@ -30,10 +31,10 @@ class Mnemonic
   end
 
   def validate_entropy
-    raise InputError.new("Input entropy must be a string form of a hex number") unless entropy =~ /\A[0-9a-h]+\z/
+    raise ArgumentError.new("Input entropy must be a string form of a hex number") unless entropy =~ /\A[0-9a-h]+\z/
 
-    unless VALID_ENTROPY_SIZES.include?(entropy.size * 4)
-      raise InputError.new("Input entropy is of invalid length (#{entropy.size * 4} bits)")
+    unless VALID_ENTROPY_SIZES.include?(strength)
+      raise ArgumentError.new("Input entropy is of invalid length (#{strength} bits)")
     end
   end
 
@@ -53,7 +54,7 @@ class Mnemonic
     english_wordlist_path = File.join(gem_spec.gem_dir, "lib", "bitcoin", "mnemonic", "wordlist", "english.txt")
     File.readlines(english_wordlist_path).map(&:strip)
   rescue e
-    warn "An error occured while trying to read the mnemonic wordlist file"
+    warn "❌ An error occured while trying to read the mnemonic wordlist file #{english_wordlist_path}"
     raise e
   end
 end
