@@ -18,5 +18,5 @@ inherit_from:
   - .rubocop_todo.yml
   - .rubocop_strict.yml
 
-# RSpec/MultipleMemoizedHelpers:
-#   Max: 8
+RSpec/ExampleLength:
+  Max: 10
