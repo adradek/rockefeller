@@ -1,5 +1,5 @@
 require "keys_generator"
-require_relative "misc/test_vectors"
+require "test_vectors"
 
 describe KeysGenerator do
   let(:passphrase) { "TREZOR" }
@@ -55,6 +55,7 @@ describe KeysGenerator do
     subject(:generator) { described_class.run(mnemonic: mnemonic) }
 
     let(:mnemonic) { "skirt enact track fee kangaroo runway food force oppose very opinion lunar" }
+    let(:seed) { "0eb8030b68169628faa328c880bd453ebb530b385dad2e09a5667756db615c01c67c033ef9c75a58dd9020674616e1422b9cca4b29db63ce8d348bb1c6772834" }
 
     it "generates right master key" do
       expect(generator.master_key).to eq("084667a541b4a5be45d3c4ead6763308213ae474acd0fca2fd8008b41047ad8c")

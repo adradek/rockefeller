@@ -11,7 +11,7 @@ plugins:
   - rubocop-rspec
 
 inherit_gem:
-  standard: config/base.yml # might be: config/ruby-3.0.yml
+  standard: config/ruby-3.0.yml
   standard-custom: config/base.yml
 
 inherit_from:
@@ -20,3 +20,6 @@ inherit_from:
 
 RSpec/ExampleLength:
   Max: 10
+
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: compact
