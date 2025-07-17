@@ -1,13 +1,22 @@
 require "digest"
+require "securerandom"
 
 # This class is responsible for the seed phrase generation according to BIP-39 (English only)
 class Mnemonic
-  class ArgumentError < StandardError; end
-
-  VALID_ENTROPY_SIZES = [128, 160, 192, 224, 256]
+  VALID_ENTROPY_STRENGTHS = [128, 160, 192, 224, 256]
 
   attr_reader :entropy
 
+  def self.generate_random(strength)
+    unless VALID_ENTROPY_STRENGTHS.include?(strength)
+      raise ArgumentError.new("Required entropy strength (#{strength} bits) is not in the list " \
+        "of acceptable values: #{VALID_ENTROPY_STRENGTHS}")
+    end
+
+    new(SecureRandom.random_bytes(strength / 8).unpack1("H*"))
+  end
+
+  # @param [String] entropy - hex string of 128-256 bits of information
   def initialize(entropy)
     @entropy = entropy
     validate_entropy
@@ -33,7 +42,7 @@ class Mnemonic
   def validate_entropy
     raise ArgumentError.new("Input entropy must be a string form of a hex number") unless entropy =~ /\A[0-9a-h]+\z/
 
-    unless VALID_ENTROPY_SIZES.include?(strength)
+    unless VALID_ENTROPY_STRENGTHS.include?(strength)
       raise ArgumentError.new("Input entropy is of invalid length (#{strength} bits)")
     end
   end
@@ -53,7 +62,7 @@ class Mnemonic
     gem_spec = Gem::Specification.find_by_name("bitcoinrb")
     english_wordlist_path = File.join(gem_spec.gem_dir, "lib", "bitcoin", "mnemonic", "wordlist", "english.txt")
     File.readlines(english_wordlist_path).map(&:strip)
-  rescue e
+  rescue => e
     warn "❌ An error occured while trying to read the mnemonic wordlist file #{english_wordlist_path}"
     raise e
   end

@@ -1,12 +1,12 @@
 require "openssl"
 
-# It produces private master key for wallet from the mnemonic word list and optional pass phrase
+# It produces extended private key from the mnemonic wordlist and optional passphrase
 class KeysGenerator
   class ArgumentError < StandardError; end
 
   HASHING_ROUNDS = 2048
 
-  attr_reader :mnemonic, :passphrase, :seed, :master_key, :chain_code
+  attr_reader :mnemonic, :passphrase, :seed, :private_key, :chain_code
 
   def self.run(mnemonic:, passphrase: "")
     new(mnemonic: mnemonic, passphrase: passphrase)
@@ -19,12 +19,16 @@ class KeysGenerator
     generate_keys
   end
 
+  def ext_private_key
+    "#{private_key}#{chain_code}"
+  end
+
   private
 
   def generate_keys
     binary_seed = generate_binary_seed
     @seed = binary_seed.unpack1("H*")
-    @master_key, @chain_code =
+    @private_key, @chain_code =
       OpenSSL::HMAC
         .digest(OpenSSL::Digest.new("SHA512"), "Bitcoin seed", binary_seed)
         .unpack1("H*")

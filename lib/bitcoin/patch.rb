@@ -14,7 +14,7 @@ module Bitcoin
     attr_accessor :parent
 
     # produce an instance by master private key
-    # @params [String] private_key
+    # @params [String] private_key - hex string
     def self.generate_master_by_private_key(private_key)
       ext_key = ExtKey.new
       ext_key.depth = ext_key.number = 0

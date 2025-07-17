@@ -28,9 +28,7 @@ describe "Bitcoin::ExtKey" do
   describe "#derive_path" do
     let(:ext_key) do
       Bitcoin::ExtKey.generate_master(
-        KeysGenerator
-          .run(mnemonic: TestData.vector_one[:mnemonic])
-          .seed
+        KeysGenerator.run(mnemonic: TestData.vector_one[:mnemonic]).seed
       )
     end
 
@@ -49,9 +47,7 @@ describe "Bitcoin::ExtKey" do
   describe "#parent" do
     let(:ext_key) do
       Bitcoin::ExtKey.generate_master(
-        KeysGenerator
-          .run(mnemonic: TestData.vector_one[:mnemonic])
-          .seed
+        KeysGenerator.run(mnemonic: TestData.vector_one[:mnemonic]).seed
       )
     end
 
