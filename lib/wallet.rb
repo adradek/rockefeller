@@ -29,4 +29,8 @@ class Wallet
     @root = root
     @precursors = precursors
   end
+
+  def to_s
+    "Wallet: #{name}\nPrivKey: #{root.priv}"
+  end
 end
