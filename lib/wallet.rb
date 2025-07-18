@@ -3,6 +3,9 @@ require "bitcoin/patch"
 require "keys_generator"
 
 class Wallet
+  EXTERNAL_PULL = 5
+  CHANGE_PULL = 5
+
   def self.generate_by_mnemonic(name:, mnemonic:, passphrase: "")
     mnemonic =
       if mnemonic && mnemonic.size > 0
@@ -30,7 +33,37 @@ class Wallet
     @precursors = precursors
   end
 
+  def leaves
+    @leaves ||= generate_leaves
+  end
+
   def to_s
-    "Wallet: #{name}\nPrivKey: #{root.priv}"
+    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr}" }.concat(
+      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr}" }
+    ).join("\n")
+  end
+
+  private
+
+  def external_addresses
+    leaves[:external].map(&:addr)
+  end
+
+  def change_addresses
+    leaves[:change].map(&:addr)
+  end
+
+  def generate_leaves
+    account = root.derive_path("m/84H/1H/0H")
+
+    puts "root fingerprint: #{root.fingerprint}"
+    puts "account fingerprint: #{account.fingerprint}"
+    external = account.derive(0)
+    change = account.derive(1)
+
+    {
+      external: EXTERNAL_PULL.times.map { |i| external.derive(i) },
+      change: CHANGE_PULL.times.map { |i| change.derive(i) }
+    }
   end
 end

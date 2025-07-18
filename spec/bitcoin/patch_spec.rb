@@ -63,4 +63,37 @@ describe "Bitcoin::ExtKey" do
       end
     end
   end
+
+  describe "walk through BIP84 test vectors" do
+    subject(:ext_key) do
+      Bitcoin::ExtKey.generate_master(KeysGenerator.run(mnemonic: TestData.bip84[:mnemonic]).seed)
+    end
+
+    it "generates right account 0'", :aggregate_failures do
+      account0 = ext_key.derive_path("m/84H/0H/0H")
+      expect(account0.to_base58).to eq(TestData.bip84[:account0][:xprv])
+      expect(account0.ext_pubkey.to_base58).to eq(TestData.bip84[:account0][:xpub])
+    end
+
+    it "generates right zero receiving address 0'/0/0", :aggregate_failures do
+      rcv_zero = ext_key.derive_path("m/84H/0H/0H/0/0")
+      expect(rcv_zero.key.to_wif).to eq(TestData.bip84[:receive0][:prv_wif])
+      expect(rcv_zero.pub).to eq(TestData.bip84[:receive0][:pub_wif])
+      expect(rcv_zero.addr).to eq(TestData.bip84[:receive0][:addr])
+    end
+
+    it "generates right first receiving address 0'/0/1", :aggregate_failures do
+      rcv_one = ext_key.derive_path("m/84H/0H/0H/0/1")
+      expect(rcv_one.key.to_wif).to eq(TestData.bip84[:receive1][:prv_wif])
+      expect(rcv_one.pub).to eq(TestData.bip84[:receive1][:pub_wif])
+      expect(rcv_one.addr).to eq(TestData.bip84[:receive1][:addr])
+    end
+
+    it "generates right zero change address 0'/1/0", :aggregate_failures do
+      chg_zero = ext_key.derive_path("m/84H/0H/0H/1/0")
+      expect(chg_zero.key.to_wif).to eq(TestData.bip84[:change1][:prv_wif])
+      expect(chg_zero.pub).to eq(TestData.bip84[:change1][:pub_wif])
+      expect(chg_zero.addr).to eq(TestData.bip84[:change1][:addr])
+    end
+  end
 end
