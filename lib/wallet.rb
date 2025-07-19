@@ -1,6 +1,8 @@
-require "mnemonic"
-require "bitcoin/patch"
-require "keys_generator"
+require_relative "mnemonic"
+require_relative "bitcoin/patch"
+require_relative "keys_generator"
+require_relative "wallet/address_data"
+require_relative "mempool/client"
 
 class Wallet
   EXTERNAL_PULL = 5
@@ -38,12 +40,44 @@ class Wallet
   end
 
   def to_s
-    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr}" }.concat(
-      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr}" }
+    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr} - #{balance(addr)}" }.concat(
+      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr} - #{balance(addr)}" }
     ).join("\n")
   end
 
+  def balances
+    @balances ||= get_balances_concurrent
+  end
+
+  # 2 seconds 10 requests
+  def get_balances
+    all_addresses.map do |address|
+      data = Mempool::Client.get_address_stats(address)
+      [address, AddressData.new(data).balance_cents]
+    end.to_h
+  end
+
+  # 0.3 seconds 10 requests
+  def get_balances_concurrent
+    results = {}
+    mutex = Mutex.new
+
+    all_addresses.map do |address|
+      Thread.new do
+        data = Mempool::Client.get_address_stats(address)
+        balance = AddressData.new(data).balance_cents
+        mutex.synchronize { results[address] = balance }
+      end
+    end.each(&:join)
+
+    results
+  end
+
   private
+
+  def all_addresses
+    external_addresses.concat(change_addresses)
+  end
 
   def external_addresses
     leaves[:external].map(&:addr)
@@ -53,11 +87,9 @@ class Wallet
     leaves[:change].map(&:addr)
   end
 
+  # Takes too much time
   def generate_leaves
     account = root.derive_path("m/84H/1H/0H")
-
-    puts "root fingerprint: #{root.fingerprint}"
-    puts "account fingerprint: #{account.fingerprint}"
     external = account.derive(0)
     change = account.derive(1)
 
@@ -65,5 +97,9 @@ class Wallet
       external: EXTERNAL_PULL.times.map { |i| external.derive(i) },
       change: CHANGE_PULL.times.map { |i| change.derive(i) }
     }
+  end
+
+  def balance(address)
+    balances[address].to_f / 10_000
   end
 end
