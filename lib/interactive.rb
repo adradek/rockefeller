@@ -71,12 +71,22 @@ class Interactive
         puts
         puts "    ✅ Кошелек [#{wallet.name}] восстановлен. Проверяем балансы..."
         puts
-        wallet.to_s.split("\n").each do |line|
-          puts "       #{line}"
-        end
-        puts
-        puts "    Время тратить деньги! Введите номер кошелька получателя ['' - выход]"
+        show_wallet_data(wallet)
       end
+    end
+
+    def show_wallet(wallet)
+      within_template { show_wallet_data(wallet) }
+    end
+
+    def show_wallet_data(wallet)
+      puts "    💰 Балансы кошелька [#{wallet.name}] (выводятся в mBTC)"
+      puts
+      wallet.to_s.split("\n").each do |line|
+        puts "       #{line}"
+      end
+      puts
+      puts "    Время тратить деньги! Введите номер кошелька получателя ['' - выход]"
     end
   end
 end

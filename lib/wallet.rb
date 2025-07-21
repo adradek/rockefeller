@@ -1,12 +1,13 @@
 require_relative "mnemonic"
 require_relative "bitcoin/patch"
 require_relative "keys_generator"
-require_relative "wallet/address_data"
+require_relative "wallet/address"
 require_relative "mempool/client"
 
 class Wallet
-  EXTERNAL_PULL = 5
+  EXTERNAL_PULL = 7
   CHANGE_PULL = 5
+  DEFAULT_FEE = 100 # satoshi
 
   def self.generate_by_mnemonic(name:, mnemonic:, passphrase: "")
     mnemonic =
@@ -40,51 +41,32 @@ class Wallet
   end
 
   def to_s
-    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr} - #{balance(addr)}" }.concat(
-      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr} - #{balance(addr)}" }
+    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr.address} - #{addr.balance_mbtc}" }.concat(
+      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr.address} - #{addr.balance_mbtc}" }
     ).join("\n")
   end
 
-  def balances
-    @balances ||= get_balances_concurrent
+  def update_balances
+    (addresses[:external] + addresses[:change])
+      .map { |addr| Thread.new { addr.update_balance } }
+      .each(&:join)
   end
 
-  # 2 seconds 10 requests
-  def get_balances
-    all_addresses.map do |address|
-      data = Mempool::Client.get_address_stats(address)
-      [address, AddressData.new(data).balance_cents]
-    end.to_h
+  def external_addresses
+    addresses[:external]
   end
 
-  # 0.3 seconds 10 requests
-  def get_balances_concurrent
-    results = {}
-    mutex = Mutex.new
-
-    all_addresses.map do |address|
-      Thread.new do
-        data = Mempool::Client.get_address_stats(address)
-        balance = AddressData.new(data).balance_cents
-        mutex.synchronize { results[address] = balance }
-      end
-    end.each(&:join)
-
-    results
+  def change_addresses
+    addresses[:change]
   end
 
   private
 
-  def all_addresses
-    external_addresses.concat(change_addresses)
-  end
-
-  def external_addresses
-    leaves[:external].map(&:addr)
-  end
-
-  def change_addresses
-    leaves[:change].map(&:addr)
+  def addresses
+    @addresses ||= {
+      external: leaves[:external].map { |leaf| Address.new(leaf.addr) },
+      change: leaves[:change].map { |leaf| Address.new(leaf.addr) }
+    }
   end
 
   # Takes too much time
@@ -97,9 +79,5 @@ class Wallet
       external: EXTERNAL_PULL.times.map { |i| external.derive(i) },
       change: CHANGE_PULL.times.map { |i| change.derive(i) }
     }
-  end
-
-  def balance(address)
-    balances[address].to_f / 10_000
   end
 end

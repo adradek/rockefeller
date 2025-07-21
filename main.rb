@@ -41,6 +41,10 @@ rescue OpenSSL::Cipher::CipherError
   exit(1)
 end
 
+def ask_for_user_input
+  gets.strip.tap { |input| exit(0) if QUIT_COMMANDS.include?(input) }
+end
+
 if (wallets = Storage::Operations.wallets).empty?
   Interactive.no_wallets
 else
@@ -49,9 +53,7 @@ end
 
 action = gets.strip
 
-exit(0) if QUIT_COMMANDS.include?(action)
-
-_wallet =
+wallet =
   if action.empty? && wallets.empty?
     generate_wallet(DEFAULT_WALLET)
   elsif action.empty? && wallets.include?(DEFAULT_WALLET)
@@ -63,5 +65,11 @@ _wallet =
   else
     generate_wallet(action)
   end
+
+(0..10).each do |i|
+  _input = ask_for_user_input
+  wallet.update_balances
+  Interactive.show_wallet(wallet)
+end
 
 puts "\n\n\n"
