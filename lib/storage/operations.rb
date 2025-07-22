@@ -12,7 +12,7 @@ module Storage
     end
 
     def self.latest_wallet
-      latest = seed_files.max_by { |fname| Pathname.new(fname).birthtime }
+      latest = seed_files.max_by { |fname| Pathname.new(fname).mtime }
       latest && latest.split("/").last[...-5]
     end
 
