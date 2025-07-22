@@ -69,6 +69,9 @@ describe "Bitcoin::ExtKey" do
       Bitcoin::ExtKey.generate_master(KeysGenerator.run(mnemonic: TestData.bip84[:mnemonic]).seed)
     end
 
+    before { Bitcoin.chain_params = :mainnet }
+    after { Bitcoin.chain_params = :signet }
+
     it "generates right account 0'", :aggregate_failures do
       account0 = ext_key.derive_path("m/84H/0H/0H")
       expect(account0.to_base58).to eq(TestData.bip84[:account0][:xprv])

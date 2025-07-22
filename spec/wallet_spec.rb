@@ -61,4 +61,32 @@ describe Wallet do
       expect(method_call.root.chain_code.bth).to eq(TestData.vector_one[:chain_code])
     end
   end
+
+  describe "#generate_transaction" do
+    let(:wallet) do
+      described_class.restore_from_seed(name: "test", seed: TestData.vector_two[:seed]).tap do |wallet|
+        allow(wallet).to receive(:all_addresses).and_return(TestData.vector_two[:addresses]
+          .map { |addr| Wallet::Address.new(addr) })
+      end
+    end
+
+    let(:outputs) { ["tb1qcumhr4pu8wukza39g5ef7t4spxk2cfe0xer7qp 2476", "tb1q2yakzsctsrlse28e5hau06uz8nrkvu0feslunj 1000"] }
+    let(:source_address) { "tb1qq2duge948mxlwdf844wlahsdemt745ez2fvm6g" }
+
+    context "when source_address doesn't belong to the wallet" do
+      it "raises error" do
+        source_address = "tb1qTotaLyWierdAddress00000000000000000000"
+        expect { wallet.generate_transaction(outputs, source_address) }
+          .to raise_error(Wallet::TransactionError, "Source address #{source_address} not found in the wallet")
+      end
+    end
+
+    context "when more than one output with not specified amount" do
+      it "raises error" do
+        outputs = ["tb1qcumhr4pu8wukza39g5ef7t4spxk2cfe0xer7qp", "tb1q2yakzsctsrlse28e5hau06uz8nrkvu0feslunj"]
+        expect { wallet.generate_transaction(outputs, source_address) }
+          .to raise_error(Wallet::TransactionError, "More than one output with zero amount")
+      end
+    end
+  end
 end

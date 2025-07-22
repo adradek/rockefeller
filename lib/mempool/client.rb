@@ -4,6 +4,8 @@ require "json"
 
 module Mempool
   class Client
+    class Error < StandardError; end
+
     BASE_URL = "https://mempool.space/signet/api"
 
     class << self
@@ -23,6 +25,23 @@ module Mempool
 
       def get_address_utxo(address)
         get_request("/address/#{address}/utxo")
+      end
+
+      def broadcast_transaction(raw_tx)
+        url = URI("#{BASE_URL}/tx")
+        http = Net::HTTP.new(url.host, url.port)
+        http.use_ssl = (url.scheme == "https")
+
+        request = Net::HTTP::Post.new(url.request_uri)
+        request.body = raw_tx
+        request["Content-Type"] = "text/plain"
+
+        response = http.request(request)
+        if response.code != "200"
+          raise Error, "Mempool error: #{response.body}"
+        end
+
+        response.body
       end
     end
   end
