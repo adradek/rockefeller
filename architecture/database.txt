@@ -1,0 +1,60 @@
+currencies (поддерживаемые валюты)
+--------------------------------------------------------------------------------------
+id                    serial (PK)   Уникальный идентификатор валюты
+code                  varchar(255)  Код валюты (например: BTC, USDT)
+name                  varchar(255)  Название валюты (например: Bitcoin)
+network_fee           numeric       Сетевая комиссия для отправки (в валюте сети)
+exchange_fee_percent  numeric       Комиссия обменника (в процентах от суммы обмена)
+created_at
+updated_at
+
+
+orders (заказы на обмен)
+--------------------------------------------------------------------------------------
+id                   serial (PK)
+uuid                 uuid
+source_currency_id   integer (FK)    Исходная валюта
+target_currency_id   integer (FK)    Целевая валюта
+source_amount        integer         Сумма, которую отправляет пользователь (в "копейках")
+target_amount        integer         Сумма, которую получит пользователь
+exchange_fee         integer         Комиссия обменника в целевой валюте
+network_fee          integer         Сетевая комиссия в целевой валюте
+user_target_address  varchar(255)    Адрес пользователя для получения целевой валюты
+user_email           varchar(255)
+payment_address      varchar(255)    Адрес, на который пользователь отправляет исходную валюту
+status               integer         Статус заказа: 0 - created, 1 - awaiting_payment, processing, completed, cancelled...
+estimated_time_min   integer         Минимальная оценка времени обмена (в минутах)
+estimated_time_max   integer         Максимальная оценка времени обмена (в минутах)
+tx_hash              varchar(255)    Хэш транзакции поступления средств (от пользователя)
+payout_tx_hash       varchar(255)    Хэш транзакции отправки средств (пользователю)
+created_at
+updated_at
+
+
+addresses (кошельки обменника)
+-----------------------------------------------------------------------
+id              serial (PK)
+currency_id     integer (FK)   Код валюты кошелька
+address         varchar(255)
+wallet          varchar(255)   Какая-то ссылка на wallet, к которому относится адрес + путь (e.g. m/84'/...)
+balance         integer        Текущий баланс кошелька
+created_at
+updated_at
+
+
+admins (администраторы)
+-----------------------------------------------------------------------
+id              serial   (PK)
+email           varchar(255) (unique)
+password_hash   varchar(255)
+created_at
+updated_at
+
+
+admin_sessions (сессии администраторов)
+-----------------------------------------------------------------------
+id             uuid (PK)
+admin_id       integer (FK)
+token          varchar(255)  токен сессии
+created_at
+expires_at

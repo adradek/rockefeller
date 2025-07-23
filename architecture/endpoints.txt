@@ -1,0 +1,111 @@
+GET  /api/exchange/{currency_pair} - запрос условий по обмену валют
+  params:
+    currency_pair:    string   # исходная и целевая валюты (USDT_BTC)
+
+  response:
+    source_currency:  string   # (USDT)
+    target_currency:  string   # (BTC)
+    exchange_fee:     float    # Комиссия обменника в целевой валюте
+    network_fee:      float
+    course:           float    # текущий курс обмена
+
+
+
+POST /api/orders - cоздание заказа на обмен
+  params:
+    source_currency:      string
+    target_currency:      string
+    source_amount:        integer  # Сумма, отправляемая пользователем (копейки)
+    course:               float    # Курс на момент создания заказа (*)
+    user_target_address:  string   # Адрес пользователя для получения средств
+    user_email:           string
+
+  * - потом мы его провалидируем в контроллере, но, мне кажется, курс, так как он все время меняется, важно как-то зафиксировать
+
+  response:
+    order_id:            uuid
+    payment_address:     string    # Адрес, на который нужно отправить средства
+    target_amount:       integer   # Сумма в целевой валюте, которую получит пользователь
+    exchange_fee:        float
+    network_fee:         float
+    estimated_time_min:  integer   # Оценка минимального времени обработки (в минутах)
+    estimated_time_max:  integer   # Оценка максимального времени обработки (в минутах)
+    status:              string    # Статус заказа (created)
+
+
+
+GET /api/orders/{order_id} - Получение деталей заказа по UUID
+  params:
+    order_id:   uuid
+
+  response:
+    order_id:         uuid
+    source_currency:      string
+    target_currency:      string
+    source_amount:        integer
+    target_amount:        integer
+    payment_address:      string
+    user_target_address:  string     # Адрес получения пользователя
+    exchange_fee:         float
+    network_fee:          float
+    status:               string     # Текущий статус заказа
+    tx_hash:              string     # Хэш транзакции поступления средств
+    payout_tx_hash:       string     # Хэш транзакции отправки пользователю
+    created_at:           timestamp  # Дата и время создания заказа
+    estimated_time_min:   integer
+    estimated_time_max:   integer
+
+
+
+DELETE /api/admin/orders/{order_id} - (админский эндпоинт) Отмена существующего заказа
+  params:
+    order_id:   uuid
+
+  response:
+    order_id:  uuid
+    status:    string
+
+
+
+GET /api/admin/orders - Получение списка всех заказов
+  params:
+    status:    string     # опциональный фильтр по статусу (+ по каким-то другим полям, на что хватит фантазии)
+
+  response:
+    orders:   Array<OrderInfo>    # +- массив объектов из запроса GET /api/orders/{order_id}
+
+
+
+GET /api/admin/wallets
+  params: []
+
+  response:
+    currency_code:  string
+    address:        string
+    wallet:         string     # возможно, для удобства стоит выводить какой-то коммент по принаджлежности аадреса
+    balance:        float
+    updated_at:     timestamp
+
+
+
+POST /api/admin/login - логин админа
+  params:
+    email:     string
+    password:  string
+
+  response:
+    token:        string      # токен для админских запросов
+    expires_at:   timestamp   # Время окончания действия токена
+
+
+
+DELETE /api/admin/logout
+  params:
+    token:        string      # на случай, если надо состарить чужой токен
+
+  response:
+    success:      boolean     # Флаг успеха операции *- может быть добавлен ко многим предыдущим эндпоинтам
+
+
+Защита админских ресурсов:
+  Authorization: Bearer {token}
