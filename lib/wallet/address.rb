@@ -13,8 +13,12 @@ class Wallet
       balance.to_f / 100_000
     end
 
-    def balance
+    def possible_balance
       utxo.sum(&:value)
+    end
+
+    def balance
+      confirmed_utxo.sum(&:value)
     end
 
     def utxo
@@ -33,6 +37,12 @@ class Wallet
     def update_utxo
       payload = Mempool::Client.get_address_utxo(address)
       @utxo = payload.map { |data| UTXO.new(data) }
+    end
+
+    def balance_string
+      result = "#{address} - #{balance_mbtc}"
+      result << "\t  (#{possible_balance.to_f / 100_000})" if balance != possible_balance
+      result
     end
   end
 end

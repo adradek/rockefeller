@@ -43,8 +43,8 @@ class Wallet
   end
 
   def to_s
-    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr.address} - #{addr.balance_mbtc}" }.concat(
-      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr.address} - #{addr.balance_mbtc}" }
+    external_addresses.map.with_index { |addr, i| "🟢 m/0/#{i}: #{addr.balance_string}" }.concat(
+      change_addresses.map.with_index { |addr, i| "🔴 m/1/#{i}: #{addr.balance_string}" }
     ).join("\n")
   end
 

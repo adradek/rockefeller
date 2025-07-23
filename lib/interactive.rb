@@ -86,6 +86,7 @@ class Interactive
     end
 
     def show_wallet(wallet)
+      wallet.update_balances
       within_template { show_wallet_data(wallet) }
     end
 
