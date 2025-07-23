@@ -16,7 +16,7 @@ services:
     environment: &app_environment
       EDITOR: nano
       HISTFILE: /app/.bash/.bash_history
-    # command: bundle exec rails
+    command: bin/run.sh
 
 volumes:
   bundle:
