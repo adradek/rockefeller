@@ -94,13 +94,11 @@ class Wallet
 
     using_utxo.each do |utxo|
       tx.in << Bitcoin::TxIn.new(out_point: Bitcoin::OutPoint.from_txid(utxo.txid, utxo.vout))
-      puts tx.in.last.inspect
     end
 
     outputs.each do |addr, val|
       output_pubkey = Bitcoin::Script.parse_from_addr(addr)
       tx.out << Bitcoin::TxOut.new(value: val, script_pubkey: output_pubkey)
-      puts tx.out.last.inspect
     end
 
     using_utxo.each_with_index do |utxo, i|

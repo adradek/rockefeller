@@ -5,14 +5,14 @@ class Interactive
       puts "💰💰💰 Добро пожаловать в Rockefeller Wallet (Bitcoin Signet) 💰💰💰\n\n"
     end
 
-    def standrd_prompt
+    def standard_prompt
       print "    > "
     end
 
     def within_template
       puts_header
       yield
-      standrd_prompt
+      standard_prompt
     end
 
     def no_wallets
@@ -36,7 +36,7 @@ class Interactive
       within_template do
         puts "    🚀 Создаем новый кошелек [#{name}]"
         puts
-        puts "    Задайте пароль [по умолчанию = '']:"
+        puts "    Задайте пароль (по умолчанию = ''):"
       end
     end
 
@@ -44,7 +44,7 @@ class Interactive
       within_template do
         puts "    📁 Загружаем кошелек [#{name}]"
         puts
-        puts "    Введите пароль [по умолчанию = '']:"
+        puts "    Введите пароль (по умолчанию = ''):"
       end
     end
 
@@ -56,8 +56,9 @@ class Interactive
 
     def show_generated_mnemonic(mnemonic)
       puts
-      puts "    Экономим ваше время, сгенерировали мнемонику автоматически (сохраните ее у себя):"
-      puts "    '#{mnemonic}'"
+      puts "    💡 Экономим ваше время, сгенерировали мнемонику автоматически (сохраните ее у себя):"
+      puts "    #{mnemonic}"
+      gets
     end
 
     def unable_to_restore_wallet
@@ -75,6 +76,15 @@ class Interactive
       end
     end
 
+    def wallet_created(wallet)
+      within_template do
+        puts
+        puts "    ✅ Кошелек [#{wallet.name}] создан. Немного подождите..."
+        puts
+        show_wallet_data(wallet)
+      end
+    end
+
     def show_wallet(wallet)
       within_template { show_wallet_data(wallet) }
     end
@@ -86,7 +96,23 @@ class Interactive
         puts "       #{line}"
       end
       puts
-      puts "    Время тратить деньги! Введите номер кошелька получателя ['' - выход]"
+      puts "    💸 Время тратить деньги!"
+      puts "    Введите адрес получателя и сумму в satoshi через пробел: tb1q... 10000"
+      puts "    Адрес для сдачи вводите последним (можно без суммы), '' - к следующему шагу, [q, quit, x, exit, Ctrl+C] - выход:"
+      puts
+    end
+
+    def ask_for_source_address
+      puts
+      puts "    Введите адрес списания: tb1q..."
+      puts
+      standard_prompt
+    end
+
+    def transaction_report(payload)
+      puts
+      puts "    🌐 Транзакция отправлена в mempool.space - id: #{payload}"
+      puts "    https://mempool.space/signet/tx/#{payload}"
     end
   end
 end

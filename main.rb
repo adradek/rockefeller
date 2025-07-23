@@ -23,6 +23,7 @@ def generate_wallet(name)
     binary_seed = wallet.precursors.seed.htb
     cypher_text = Encryptor.new(user_password).encrypt(binary_seed)
     Storage::Operations.save_seed(name, cypher_text)
+    Interactive.wallet_created(wallet)
   end
 end
 
@@ -41,7 +42,7 @@ rescue OpenSSL::Cipher::CipherError
   exit(1)
 end
 
-def ask_for_user_input
+def interruptible_gets
   gets.strip.tap { |input| exit(0) if QUIT_COMMANDS.include?(input) }
 end
 
@@ -51,24 +52,43 @@ else
   Interactive.show_wallets(wallets)
 end
 
-action = gets.strip
+wallet_name = gets.strip
 
 wallet =
-  if action.empty? && wallets.empty?
+  if wallet_name.empty? && wallets.empty?
     generate_wallet(DEFAULT_WALLET)
-  elsif action.empty? && wallets.include?(DEFAULT_WALLET)
+  elsif wallet_name.empty? && wallets.include?(DEFAULT_WALLET)
     restore_wallet(DEFAULT_WALLET)
-  elsif action.empty?
+  elsif wallet_name.empty?
     restore_wallet(Storage::Operations.latest_wallet)
-  elsif wallets.include?(action)
-    restore_wallet(action)
+  elsif wallets.include?(wallet_name)
+    restore_wallet(wallet_name)
   else
-    generate_wallet(action)
+    generate_wallet(wallet_name)
   end
 
-(0..10).each do |i|
-  _input = ask_for_user_input
-  wallet.update_balances
+# Each iteration generates and sends transaction
+loop do
+  outputs = []
+
+  loop do
+    output = interruptible_gets
+    break if output.empty?
+    outputs << output
+    break if output.split.size == 1 # change address (without amount)
+    Interactive.standard_prompt
+  end
+
+  unless outputs.empty?
+    Interactive.ask_for_source_address
+    source_address = interruptible_gets
+    tx = wallet.generate_transaction(outputs, source_address)
+    payload = Mempool::Client.broadcast_transaction(tx.to_hex)
+
+    Interactive.transaction_report(payload)
+    interruptible_gets
+  end
+
   Interactive.show_wallet(wallet)
 end
 
