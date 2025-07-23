@@ -39,11 +39,17 @@ def restore_wallet(name)
   end
 rescue OpenSSL::Cipher::CipherError
   Interactive.unable_to_restore_wallet
+  puts "\n\n\n"
   exit(1)
 end
 
 def interruptible_gets
-  gets.strip.tap { |input| exit(0) if QUIT_COMMANDS.include?(input) }
+  gets.strip.tap do |input|
+    if QUIT_COMMANDS.include?(input)
+      puts "\n\n\n"
+      exit(0)
+    end
+  end
 end
 
 if (wallets = Storage::Operations.wallets).empty?
@@ -91,5 +97,3 @@ loop do
 
   Interactive.show_wallet(wallet)
 end
-
-puts "\n\n\n"
