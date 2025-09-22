@@ -51,7 +51,7 @@ class Interactive
     def ask_for_mnemonic
       puts
       puts "    Введите мнемоническую фразу или она сгенерируется автоматически:"
-      standrd_prompt
+      standard_prompt
     end
 
     def show_generated_mnemonic(mnemonic)
