@@ -39,10 +39,9 @@ def restore_wallet(name)
   end
 rescue OpenSSL::Cipher::CipherError
   Interactive.unable_to_restore_wallet
+  exit(1)
 rescue OpenSSL::SSL::SSLError, Socket::ResolutionError => e
   Interactive.connection_error(e)
-ensure
-  puts "\n\n\n"
   exit(1)
 end
 
